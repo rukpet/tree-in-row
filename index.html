@@ -12,40 +12,55 @@
             grid-template-areas:
                 'head head'
                 'grid log';
-            grid-gap: 3vw;
-            padding: 20px;
-            grid-template-rows: auto;
-            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 2vw;
+            padding: 10px 4vw;
         }
 
-        @media screen and (max-width: 600px) {
+        @media screen and (max-width: 800px) {
             #container {
                 grid-template-areas:
                     'head'
                     'grid'
                     'log';
-                grid-template-rows: auto;
-                grid-template-columns: auto;
             }
         }
 
         #header {
             grid-area: head;
+            font-size: 30px;
+        }
+
+        #header>h3 {
+            margin: 0px;
         }
 
         #grid {
             grid-area: grid;
             display: grid;
-            grid-template-columns: repeat(9, minmax(25px, 3.5vw));
+            grid-template-columns: repeat(9, 45px);
             grid-gap: 1vw;
-            grid-auto-rows: minmax(25px, 3.5vw);
+            grid-auto-rows: 45px;
+        }
+
+        @media screen and (max-width: 800px) {
+            #grid {
+                grid-template-columns: repeat(9, 28px);
+                grid-gap: 3px;
+                grid-auto-rows: 28px;
+            }
         }
 
         #grid>div {
-            font-size: 2.5vw;
+            font-size: 30px;
             padding: 5px;
             background: rgb(184, 50, 56);
             text-align: center;
+        }
+
+        @media screen and (max-width: 800px) {
+            #grid>div {
+                font-size: 20px;
+            }
         }
 
         #grid>div[data-tree="hide"][data-slow="true"] {
@@ -70,7 +85,7 @@
 
         #log {
             grid-area: log;
-            font-size: 3vw;
+            font-size: 30px;
             padding-left: 3vw;
             margin: 0px;
         }
@@ -80,9 +95,8 @@
 <body>
     <div id="container">
         <div id="header">
-            <h1>Задача "Три в ряд"</h1>
-            Код: <a
-                href="https://github.com/rukpet/tree-in-row/index.html">https://github.com/rukpet/tree-in-row/index.html</a>
+            <h3>Задача "Три в ряд"</h3>
+            Код: <a href="https://github.com/rukpet/tree-in-row">https://github.com/rukpet/tree-in-row</a>
         </div>
 
         <div id="grid">
