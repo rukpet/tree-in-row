@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>"3 in row" task</title>
+    <style>
+        #container {
+            display: grid;
+            grid-template-areas:
+                'head head'
+                'grid log';
+            grid-gap: 3vw;
+            padding: 20px;
+            grid-template-rows: auto;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media screen and (max-width: 600px) {
+            #container {
+                grid-template-areas:
+                    'head'
+                    'grid'
+                    'log';
+                grid-template-rows: auto;
+                grid-template-columns: auto;
+            }
+        }
+
+        #header {
+            grid-area: head;
+        }
+
+        #grid {
+            grid-area: grid;
+            display: grid;
+            grid-template-columns: repeat(9, minmax(25px, 3.5vw));
+            grid-gap: 1vw;
+            grid-auto-rows: minmax(25px, 3.5vw);
+        }
+
+        #grid>div {
+            font-size: 2.5vw;
+            padding: 5px;
+            background: rgb(184, 50, 56);
+            text-align: center;
+        }
+
+        #grid>div[data-tree="hide"][data-slow="true"] {
+            background: rgb(78, 5, 197);
+            opacity: 0;
+            transition: opacity 500ms;
+        }
+
+        #grid>div[data-tree="hide"] {
+            opacity: 0;
+        }
+
+        #grid>div[data-tree="blue"] {
+            background: rgb(78, 5, 197);
+            transition: background 0.5s ease;
+        }
+
+        #grid>div[data-tree="new"] {
+            background: rgb(1, 145, 20);
+            transition: opacity 500ms;
+        }
+
+        #log {
+            grid-area: log;
+            font-size: 3vw;
+            padding-left: 3vw;
+            margin: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>Задача "Три в ряд"</h1>
+            Код: <a
+                href="https://github.com/rukpet/tree-in-row/index.html">https://github.com/rukpet/tree-in-row/index.html</a>
+        </div>
+
+        <div id="grid">
+
+        </div>
+        <ol id="log" reversed>
+            <li>Начало.</li>
+        </ol>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <script>
+        $(() => {
+            const grid = $("#grid");
+            const logContainer = $("#log");
+
+            let columns = [];
+            for (let i = 0; i < 9; i++) {
+                columns[i] = [];
+            }
+
+            for (let i = 0; i < 90; i++) {
+                const r = getRandomInt(4);
+                const div = $(`<div data-index="${i}" data-number="${r}">${r}</div>`);
+                const colN = i % 9;
+
+                grid.append(div);
+                columns[colN].push(div);
+            }
+
+            let state = 'color';
+            let blue = null;
+
+            const intId = setInterval(() => {
+                switch (state) {
+                    case 'color':
+                        for (let i = 0; i < 9; i++) {
+                            for (let j = 1; j < 8; j++) {
+                                if (columns[i][j].attr("data-number") == columns[i][j - 1].attr("data-number") && columns[i][j].attr("data-number") == columns[i][j + 1].attr("data-number")) {
+                                    columns[i][j - 1].attr("data-tree", 'blue');
+                                    columns[i][j].attr("data-tree", 'blue');
+                                    columns[i][j + 1].attr("data-tree", 'blue');
+                                }
+                            }
+                        }
+
+                        for (let i = 0; i < 9; i++) {
+                            for (let j = 1; j < 8; j++) {
+                                if (columns[j][i].attr("data-number") == columns[j - 1][i].attr("data-number") && columns[j][i].attr("data-number") == columns[j + 1][i].attr("data-number")) {
+                                    columns[j - 1][i].attr("data-tree", 'blue');
+                                    columns[j][i].attr("data-tree", 'blue');
+                                    columns[j + 1][i].attr("data-tree", 'blue');
+                                }
+                            }
+                        }
+
+                        blue = $('#grid>div[data-tree="blue"]');
+
+                        if (!blue.length) {
+                            logContainer.prepend($(`<li>Конец.</li>`));
+                            clearTimeout(intId);
+                        } else {
+                            logContainer.prepend($(`<li>Удаляются елементы: ${$('#grid>div[data-tree="blue"]')
+                                .map((i, el) => Number(el.dataset.index) + 1)
+                                .get()
+                                .join(', ')}.</li>`));
+                        }
+
+
+                        state = 'hide';
+                        break;
+
+                    case 'hide':
+                        blue.attr("data-slow", true);
+                        blue.attr("data-tree", 'hide');
+
+                        state = 'down';
+                        break;
+
+                    case 'down':
+                        $('#grid>div[data-slow="true"]').removeAttr('data-slow');
+
+                        $('#grid>div[data-tree="hide"]')
+                            .each((i, el) => {
+                                const col = el.dataset.index % 9;
+                                let index = col + 81,
+                                    curr = $(`div[data-index=${index}]`),
+                                    upperCell = $(`div[data-index=${index - 9}]`);
+                                for (; index >= 0;
+                                    curr = upperCell,
+                                    index = index - 9,
+                                    upperCell = $(`div[data-index=${index}]`)) {
+                                    const tree = upperCell.attr("data-tree"),
+                                        number = upperCell.attr("data-number");
+                                    if (curr.attr("data-tree") === "hide" && tree !== 'hide') {
+                                        curr.attr("data-tree", tree || false);
+                                        curr.attr("data-number", number);
+                                        curr.html(number);
+                                        upperCell.attr("data-tree", "hide");
+                                    }
+                                }
+                            });
+
+                        state = 'new';
+                        break;
+
+                    case 'new':
+                        $('#grid>div[data-tree="hide"]')
+                            .each((i, el) => {
+                                const $el = $(el);
+                                const r = getRandomInt(4);
+                                $el.attr("data-tree", 'new');
+                                $el.attr("data-number", r);
+                                $el.html(r);
+                            });
+
+                        state = 'color';
+                        break;
+                }
+            }, 800);
+
+            function getRandomInt(max) {
+                return Math.floor(Math.random() * Math.floor(max));
+            }
+        })
+    </script>
+</body>
+
+</html>
